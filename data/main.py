@@ -71,15 +71,15 @@ def get_entropy(target_col_data):
 
 def get_info_gain(df, split_attr, target_attr='income'):    
     entropy_t = get_entropy(df[target_attr])
-    vals, counts = np.unique(df[split_attr], return_counts=True)
+    elements, counts = np.unique(df[split_attr], return_counts=True)
     
     entropy_t1 = 0.0
-    for i in range(len(vals)):
-        target_data = df.where(df[split_attr] == vals[i]).dropna()[target_attr]
+    for i in range(len(elements)):
+        target_data = df.where(df[split_attr] == elements[i]).dropna()[target_attr]
         entropy_t1 = np.sum((counts[i]/np.sum(counts)) * get_entropy(target_data))
     
     info_gain = entropy_t - entropy_t1
-    print(split_attr, ' and ', info_gain)    
+    # print(split_attr, ' and ', info_gain)    
     return info_gain
 
         
@@ -96,29 +96,78 @@ def get_best_attr(df, attributes, target_attr):
     
     return best_attr
 
-def grow():
-    pass
+
+def get_data_for_val(df, best_attr, val):
+    return df.where(df[best_attr] == val).dropna()
+    
+
+# build and grow the tree 
+def grow(df, attributes, target_attr):
+    
+    # get multi-dimensional array
+    # data = df.reset_index().values
+        
+    # get info for the best attribute
+    best_attr = get_best_attr(df, attributes, target_attr)
+    print("best attribute is: ", best_attr)
+    # best_attr = 'workclass'
+    
+    
+    # best_attr_idx = attributes.get_loc(best_attr)
+    best_attr_idx = 0
+    for attr in attributes:
+        if attr == best_attr:
+            break
+        else:
+            best_attr_idx += 1
+            
+    unique_vals = (df[best_attr].unique()).tolist()
+    
+    if len(df) == 0:
+        return np.unique(df[target_attr])[np.argmax(np.unique(df[target_attr], return_counts=True)[1])]
+    if (len(attributes) - 1) <= 0:
+        return None
+    elif unique_vals.count(unique_vals[0]) == len(unique_vals):
+        return unique_vals[0]
+    else:
+        # remove attribute from future options
+        for val in unique_vals:
+            # select best attribute rows with unique value
+            new_df = get_data_for_val(df, best_attr, val)
+            # remove attribute from future options
+            new_attr = attributes.delete(best_attr_idx)
+            
+            # recursively build the subtree
+            subtree = grow(new_df, new_attr, target_attr)
+            tree = {best_attr:{}}
+            tree[best_attr][val] = subtree
+            # print(tree[best_attr][val])
+    return tree
 
 def prune():
     pass
+
 
 def test():
     pass
 
 # build and train the decision tree 
-def learn(data, attributes, target):
-    grow(data, attributes, target)
+def learn(df, attributes, target_attr):
+    grow(df, attributes, target_attr)
     
 if __name__ == '__main__':
     #categorical_attr, numerical_attr = get_attributes(df)
     df = get_clean_data()
     print(">> 1. Preprocessing: complete")
     
+    # print('Best attribute: ', get_best_attr(df, attributes, attributes[-1]))
+    # print(">> 2. Get Best Attribute: complete")
+    
     attributes = df.columns
-    print('Best attribute: ', get_best_attr(df, attributes, attributes[-1]))
-    print(">> 2. Calculate Entropy: complete")
+    tree = {}
+    tree = learn(df, attributes, 'income')
     
-    
+    print(tree)
     
     
 # def get_attributes(df):
