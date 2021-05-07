@@ -7,7 +7,7 @@
   <img width=495 height=459 src="density-based-spatial-clustering-with-noise/dbscan-output.png"/>
 </p>
 
-- DBSCAN algorithm groups together points that are close to each other based on Euclidean distance and minimum number of points. The points that are in low-density regions are considered outliers. 
+  - DBSCAN algorithm groups together points that are close to each other based on Euclidean distance and minimum number of points. The points that are in low-density regions are considered outliers. 
 
 - **Frequent Item Search** efficient for mining large item sets from user transactions collected in E-commerce. By using this approach, companies can provide online customers with useful information about products such as price and quality of goods.
 
